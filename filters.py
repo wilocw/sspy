@@ -113,4 +113,4 @@ class KalmanFilter(_Filter):
 
 
 class LinearDiscreteKalmanFilter(KalmanFilter):
-    " Alias class for Kalman Filter "
+    """ Alias class for Kalman Filter """
