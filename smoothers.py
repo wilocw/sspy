@@ -48,7 +48,8 @@ class RauchTungStriebelSmoother(_Smoother):
         states = filter._history['updates']
         F = filter.process['f']
         Q = filter.process['Q']
-        return cls(states, F, Q)
+        U = filter.process['U']
+        return cls(states, F, Q, U)
 
     def smooth(self):
         """ """
