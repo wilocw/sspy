@@ -5,6 +5,7 @@ from scipy import linalg
 import abc
 
 from util import feval
+from util import unscented_default_params
 
 class _Filter(metaclass=abc.ABCMeta):
     """
@@ -175,14 +176,6 @@ class ExtendedKalmanFilter(KalmanFilter):
         x_ = self.state['expected']
         P_ = self.state['err_cov']
 
-        # if u is None:
-        #     x  = feval(self.process['f'], x_)
-        #     F_ = feval(self.process['Jacobian_x'], x_)
-        #     if self.process['Jacobian_Q'] is None:
-        #         w_ = np.eye(x_.shape[0])
-        #     else:
-        #         w_ = feval(self.process['Jacobian_Q'], x_)
-        # else:
         x  = np.atleast_2d(feval(self.process['f'], x_, u))
         self.state['expected'] = x.copy()
 
@@ -395,7 +388,110 @@ class SecondOrderExtendedKalmanFilter(ExtendedKalmanFilter):
 
         self._history['updates'].append(self.state.copy())
 
+##
+from util import unscented_transform
+class UnscentedKalmanFilter(KalmanFilter):
+    """
+    Unscented Kalman Filter
 
+    TODO: write docstring
+    """
+
+    def __init__(self,
+                 x0, P0,
+                 f = None, Q0 = None,
+                 h = None, R0 = None,
+                 params = unscented_default_params(),
+                 augment:bool = False,
+                 _verbose:bool = False ):
+        """ TODO: write docstring """
+        self.state = {'expected': np.atleast_2d(x0),
+                      'err_cov' : np.atleast_2d(P0)}
+
+        if f is None:
+            f = np.eye(x0.shape[0])
+        if Q0 is None:
+            Q0 = np.zeros((x0.shape[0], x0.shape[0]))
+
+        self.process = {'f': f,
+                        'Q': Q0}
+
+        if h is None:
+            h = np.eye(x0.shape[0])
+        if R0 is None:
+            y_ = feval(h, x0)
+            R0 = np.zeros((y_.shape[0], y_.shape[0]))
+
+        self.observe = {'h': h,
+                        'R': R0}
+
+        self.params = params
+        self._history = {'predictions': [],
+                         'updates': []}
+        self._history['updates'].append(self.state)
+        self.initial = self.state.copy()
+        self.augment = augment
+        self._verbose = _verbose
+
+    def predict(self, Q = None, u = None):
+        """ TODO: write docstring """
+
+        x_ = self.state['expected']
+        P_ = self.state['err_cov']
+
+        if Q is None:
+            Q = self.process['Q']
+        else:
+            self.process['Q'] = Q
+
+        if self.augment:
+            x_ = np.vstack([x_,np.zeros_like(x_)])
+            P_ = np.hstack([np.vstack([P_, np.zeros_like(P_)]),
+                            np.vstack([np.zeros_like(P_), Q])])
+
+        x, P, _ = unscented_transform(x_,P_,self.process['f'], u, self.params)
+
+        self.state['expected'] = x.copy()
+
+        if not self.augment:
+            P += Q
+
+        self.state['err_cov'] = P.copy()
+
+        self._history['predictions'].append(self.state.copy())
+
+    def update(self, y, R = None, u = None):
+        """ TODO: write docstring """
+
+        x_ = self.state['expected']
+        P_ = self.state['err_cov']
+
+        if R is None:
+            R = self.observe['R']
+        else:
+            self.observe['R'] = np.atleast_2d(R)
+
+        if self.augment:
+            n_x = np.atleast_2d(x_).shape[0]
+            n_y = np.atleast_2d(R).shape[0]
+            x_ = np.vstack([x_, np.zeros((n_y,1))])
+            P_ = np.hstack([np.vstack([P_, np.zeros((n_y,n_x))]),
+                            np.vstack([np.zeros((n_x,n_y)),R])])
+
+        y_,P_y,P_xy = unscented_transform(x_,P_,self.observe['h'],u,self.params)
+
+        if not self.augment:
+            P_y += R
+
+        K = P_xy @ linalg.inv(P_y)
+
+        x = x_ + K @ np.atleast_2d(y - y_)
+        self.state['expected'] = x.copy()
+
+        P = P_ - K @ P_y @ K.T
+        self.state['err_cov'] = P.copy()
+
+        self._history['updates'].append(self.state.copy())
 
 ### === Alias classes ===
 class LinearDiscreteKalmanFilter(KalmanFilter):
