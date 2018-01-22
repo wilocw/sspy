@@ -128,10 +128,13 @@ def rmse(x,x_):
 ##
 from matplotlib import pyplot as plt
 
-def plot_estimate(x, y, P, c='r', colour=None,
+def plot_estimate(x, y, P, c='r', ax = None, colour=None,
                   err_colour=None, alpha = 0.4,
                   linestyle='--', linewidth=3):
     """ """
+    if ax is None:
+        ax = plt.gca()
+
     if colour is not None:
         c = colour
 
@@ -142,10 +145,10 @@ def plot_estimate(x, y, P, c='r', colour=None,
     ymax = y.ravel() + err.ravel()
     ymin = y.ravel() - err.ravel()
 
-    plt.fill_between(x, ymax, ymin, alpha=alpha,
+    ax.fill_between(x, ymax, ymin, alpha=alpha,
                      facecolor=err_colour, interpolate=True)
 
-    plt.plot(x, y.ravel(), ls=linestyle, lw=linewidth, c=c)
+    ax.plot(x, y.ravel(), ls=linestyle, lw=linewidth, c=c)
 
 ##
 import numpy.matlib

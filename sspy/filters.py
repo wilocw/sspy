@@ -4,8 +4,8 @@ import numpy as np
 from scipy import linalg
 import abc
 
-from util import feval
-from util import unscented_default_params
+from sspy.util import feval
+from sspy.util import unscented_transform, unscented_default_params
 
 class _Filter(metaclass=abc.ABCMeta):
     """
@@ -389,7 +389,6 @@ class SecondOrderExtendedKalmanFilter(ExtendedKalmanFilter):
         self._history['updates'].append(self.state.copy())
 
 ##
-from util import unscented_transform
 class UnscentedKalmanFilter(KalmanFilter):
     """
     Unscented Kalman Filter

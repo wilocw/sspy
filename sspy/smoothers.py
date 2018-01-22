@@ -4,8 +4,8 @@ import numpy as np
 from scipy import linalg
 import abc
 
-from filters import _Filter
-from util import feval, unscented_transform, unscented_default_params
+from sspy.filters import _Filter
+from sspy.util import feval, unscented_transform, unscented_default_params
 
 class _Smoother(metaclass=abc.ABCMeta):
     """
