@@ -2,7 +2,7 @@
 
 ```sspy``` serves as a Python library to bring together implementations of solving state space models, particularly methods that learn system dynamics. The library is being implemented as part of an ongoing survey into learning state space dynamics. At present, the basic utilities for working with state space implementing filters and smoothers are being implemented. Later, implementations of papers will be added and benchmarked.
 
-**This repository is primarily hosted and maintained on [GitLab](https://gitlab.com/wilocw/sspy) at with the [GitHub-hosted repository](https://github.com/wilocw/sspy) serving as a secondary remote. Issues, comments and pull requests may be made via either repository.**
+**This repository is primarily hosted and maintained on [GitLab](https://gitlab.com/wilocw/sspy) with the [GitHub-hosted repository](https://github.com/wilocw/sspy) serving as a secondary remote. Issues, comments and pull requests may be made via either repository.**
 
 The base of this library is inspired by the [EKF/UKF Toolbox for MATLAB](http://becs.aalto.fi/en/research/bayes/ekfukf/) by Särkkä, Hartikainen, and Solin.
 
